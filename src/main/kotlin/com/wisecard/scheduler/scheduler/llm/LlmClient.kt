@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component
 @Component
 class LlmClient {
     fun refine(benefitText: String): String {
-        val apiKey = "AIzaSyB8ok76NbiLALkvON2tzrkaGZ0IS-Tq5cM"
+        val apiKey = ""
         val model = "gemini-2.5-flash"
 
         val prompt = """
