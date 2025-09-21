@@ -1,0 +1,82 @@
+syntax = "proto3";
+import "google/protobuf/empty.proto";
+
+// 온라인/오프라인/BOTH 구분
+enum ChannelType {
+  ONLINE = 0;
+  OFFLINE = 1;
+  BOTH = 2;
+}
+
+enum BankName {
+  HANA=0;
+  HYUNDAI=1;
+  KOOKMIN=2;
+  LOTTE=3;
+  SAMSUNG=4;
+  SHINHAN=5;
+}
+
+enum CardType {
+    CREDIT=0;
+    DEBIT=1;
+}
+
+// 할인 혜택
+message DiscountBenefit {
+  double rate = 1;           // 정률 할인
+  int32 amount = 2;         // 정액 할인
+  int32 minimum_amount = 3;  // 최소 결제 금액
+  int32 benefit_limit = 4;   // 최대 혜택 한도
+  int32 minimum_spending = 5; // 전월 최소 실적 (원 단위)
+  ChannelType channel = 6;   // 온라인/오프라인/BOTH
+}
+
+// 포인트 적립 혜택
+message PointBenefit {
+  string name = 1;            //포인트 이름
+  int32 amount = 2;          //적립금
+  double rate = 3;           // 적립률
+  int32 minimum_amount = 4;  // 최소 결제 금액
+  int32 benefit_limit = 5;   // 최대 혜택 한도
+  int32 minimum_spending = 6; // 전월 최소 실적 (원 단위)
+  ChannelType channel = 7;   // 온라인/오프라인/BOTH
+}
+
+// 캐시백 혜택
+message CashbackBenefit {
+  double rate = 1;           // 캐시백률
+  int32 amount = 2;         // 정액 캐시백
+  int32 minimum_amount = 3;  // 최소 결제 금액
+  int32 benefit_limit = 4;   // 최대 혜택 한도
+  int32 minimum_spending = 5; // 전월 최소 실적 (원 단위)
+  ChannelType channel = 6;   // 온라인/오프라인/BOTH
+}
+
+// 카드 단위
+message Benefit {
+  repeated DiscountBenefit discounts = 1;       // 할인 혜택 배열
+  repeated PointBenefit points = 2;            // 포인트 혜택 배열
+  repeated CashbackBenefit cashbacks = 3;      // 캐시백 혜택 배열
+  repeated string categories = 4;     // 카카오맵 업종 코드 (MT1, FD6, CE7 ...)
+  repeated string targets = 5;      // 브랜드명 또는 한글 설명
+  string summary = 6; //한줄 요약
+}
+
+message CardBenefit {
+  BankName card_bank = 1; // 카드사
+  string card_name = 2; //카드명
+  string img_url = 3; //카드 이미지
+  CardType card_type = 4; //CREDIT|DEBIT
+  repeated Benefit benefits = 5; // 카드에 속한 여러 혜택
+}
+
+// 카드 여러 장 처리
+message CardBenefitList {
+  repeated CardBenefit cardBenefit = 1;
+}
+
+// gRPC 서비스 정의
+service CardService {
+  rpc getCardBenefits(google.protobuf.Empty) returns (CardBenefitList);
+}
