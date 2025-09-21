@@ -1,4 +1,4 @@
-package com.wisecrad.scheduler
+package com.wisecard.scheduler
 
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
