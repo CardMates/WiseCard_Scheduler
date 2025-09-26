@@ -1,7 +1,7 @@
 package com.wisecard.scheduler.scheduler.dto
 
 data class CardInfo (
-    val cardBank: CardBank,
+    val cardCompany: CardCompany,
     val cardName: String,
     val imageUrl: String,
     val cardType: CardType,

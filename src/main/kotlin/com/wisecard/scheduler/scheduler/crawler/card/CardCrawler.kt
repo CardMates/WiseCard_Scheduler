@@ -1,4 +1,4 @@
-package com.wisecard.scheduler.scheduler.crawler
+package com.wisecard.scheduler.scheduler.crawler.card
 
 import com.wisecard.scheduler.scheduler.dto.CardInfo
 
