@@ -1,12 +1,9 @@
-# build
-FROM gradle:8-jdk21 AS builder
-WORKDIR /app
-COPY --chown=gradle:gradle . .
-RUN gradle bootJar --no-daemon
+FROM eclipse-temurin:21-jdk
 
-# runtime
-FROM eclipse-temurin:21-jre
 WORKDIR /app
-COPY --from=builder /app/build/libs/*.jar app.jar
+
+COPY build/libs/scheduler-0.0.1-SNAPSHOT.jar app.jar
+
 EXPOSE 8080
-ENTRYPOINT ["java","-jar","/app/app.jar"]
+
+ENTRYPOINT ["java", "-jar", "app.jar"]
