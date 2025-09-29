@@ -41,9 +41,9 @@ dependencies {
 
     // protobuf
     implementation("io.grpc:grpc-kotlin-stub:1.4.3")
-    implementation("io.grpc:grpc-netty-shaded:1.63.0")
-    implementation("io.grpc:grpc-protobuf:1.63.0")
-    implementation("io.grpc:grpc-stub:1.63.0")
+    implementation("io.grpc:grpc-netty-shaded:1.70.0")
+    implementation("io.grpc:grpc-protobuf:1.70.0")
+    implementation("io.grpc:grpc-stub:1.70.0")
 
     implementation("net.devh:grpc-server-spring-boot-starter:3.1.0.RELEASE")
 
