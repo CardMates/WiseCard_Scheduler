@@ -11,10 +11,13 @@ import org.openqa.selenium.chrome.ChromeOptions
 import org.springframework.stereotype.Component
 
 @Component
-class HanaCrawler : CardCrawler {
+class HanaCardCrawler : CardCrawler {
+    override val cardCompany = CardCompany.HANA
 
     private val creditCardUrl =
         "https://www.hanacard.co.kr/OPI31000000D.web?schID=pcd&mID=OPI31000005P&CT_ID=241704030444153#none"
+    private val checkCardUrl =
+        "https://www.hanacard.co.kr/OPI31000000D.web?schID=pcd&mID=OPI31000005P&CT_ID=241704050328506"
 
     private fun setupChromeDriver(): ChromeDriver {
         val chromeOptions = ChromeOptions()
@@ -28,19 +31,41 @@ class HanaCrawler : CardCrawler {
         }
     }
 
-    override fun crawlCreditCards(): List<CardInfo> {
-        println("======= [하나] 신용 카드 정보 크롤링 =======")
-        return crawlCards(CardType.CREDIT)
+    override fun crawlCreditCardBasicInfos(): List<CardInfo> {
+        println("======= [하나] 신용 카드 기본 정보 크롤링 =======")
+        return crawlCardBasics(CardType.CREDIT)
     }
 
-    override fun crawlCheckCards(): List<CardInfo> {
-        println("======= [하나] 체크 카드 정보 크롤링 =======")
-        return crawlCards(CardType.CHECK)
+    override fun crawlCheckCardBasicInfos(): List<CardInfo> {
+        println("======= [하나] 체크 카드 기본 정보 크롤링 =======")
+        return crawlCardBasics(CardType.CHECK)
     }
 
-    private fun crawlCards(cardType: CardType): List<CardInfo> {
+    override fun crawlCreditCardBenefits(cards: List<CardInfo>): List<CardInfo> {
+        println("======= [하나] 신용 카드 혜택 정보 크롤링 =======")
+        return cards.map { card ->
+            val benefits = crawlCardBenefitsFromUrl(card.cardUrl)
+            println(card.cardName + benefits)
+            card.copy(
+                benefits = benefits
+            )
+        }
+    }
+
+    override fun crawlCheckCardBenefits(cards: List<CardInfo>): List<CardInfo> {
+        println("======= [하나] 체크 카드 혜택 정보 크롤링 =======")
+        return cards.map { card ->
+            val benefits = crawlCardBenefitsFromUrl(card.cardUrl)
+            println(card.cardName + benefits)
+            card.copy(
+                benefits = benefits
+            )
+        }
+    }
+
+    private fun crawlCardBasics(cardType: CardType): List<CardInfo> {
         val driver = setupChromeDriver()
-        driver.get(creditCardUrl)
+        driver.get(if (cardType == CardType.CREDIT) creditCardUrl else checkCardUrl)
         Thread.sleep(3000)
 
         val cardInfos = mutableListOf<CardInfo>()
@@ -71,19 +96,17 @@ class HanaCrawler : CardCrawler {
                 val imgSrc = li.selectFirst("img")!!.attr("src")
                 val imgUrl = "https://www.hanacard.co.kr$imgSrc"
 
-                val benefits = crawlCardBenefits(cardUrl)
-
                 cardInfos.add(
                     CardInfo(
+                        cardId = null,
+                        cardUrl = cardUrl,
                         cardCompany = CardCompany.HANA,
                         cardName = name,
-                        imageUrl = imgUrl,
+                        imgUrl = imgUrl,
                         cardType = cardType,
-                        benefits = benefits
+                        benefits = null
                     )
                 )
-
-                println("$name $benefits")
             }
         }
 
@@ -91,7 +114,7 @@ class HanaCrawler : CardCrawler {
         return cardInfos
     }
 
-    private fun crawlCardBenefits(url: String): String {
+    private fun crawlCardBenefitsFromUrl(url: String): String {
         val driver = setupChromeDriver()
         driver.get(url)
         Thread.sleep(3000)
