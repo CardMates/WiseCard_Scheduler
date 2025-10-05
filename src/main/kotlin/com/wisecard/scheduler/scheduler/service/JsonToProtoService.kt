@@ -1,6 +1,7 @@
 package com.wisecard.scheduler.scheduler.service
 
 import Card
+import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.stereotype.Component
 
@@ -9,54 +10,65 @@ import org.springframework.stereotype.Component
 class JsonToProtoService(private val objectMapper: ObjectMapper) {
 
     fun parseJsonToProto(json: String): List<Card.Benefit> {
-        val root = objectMapper.readTree(json)
-        val benefitsArray = root.get("benefits")
-        val cardBenefitList = benefitsArray.map { benefitNode ->
-            val discounts = benefitNode.get("discounts").map {
-                Card.DiscountBenefit.newBuilder()
-                    .setRate(it.get("rate")?.asDouble() ?: 0.0)
-                    .setAmount(it.get("amount")?.asInt() ?: 0)
-                    .setMinimumAmount(it.get("minimum_amount")?.asInt() ?: 0)
-                    .setBenefitLimit(it.get("benefit_limit")?.asInt() ?: 0)
-                    .setMinimumSpending(it.get("minimum_spending")?.asInt() ?: 0)
-                    .setChannel(channelTypeFromString(it.get("channel").asText()))
-                    .build()
-            }
+        return try {
+            objectMapper.configure(JsonParser.Feature.ALLOW_COMMENTS, true) //json 내에 주석 허용
 
-            val points = benefitNode.get("points").map {
-                Card.PointBenefit.newBuilder()
-                    .setName(it.get("name")?.asText() ?: "")
-                    .setAmount(it.get("amount")?.asInt() ?: 0)
-                    .setRate(it.get("rate")?.asDouble() ?: 0.0)
-                    .setMinimumAmount(it.get("minimum_amount")?.asInt() ?: 0)
-                    .setBenefitLimit(it.get("benefit_limit")?.asInt() ?: 0)
-                    .setMinimumSpending(it.get("minimum_spending")?.asInt() ?: 0)
-                    .setChannel(channelTypeFromString(it.get("channel").asText()))
-                    .build()
-            }
+            val root = objectMapper.readTree(json)
+            val benefitsArray = root.get("benefits") ?: return emptyList()
 
-            val cashbacks = benefitNode.get("cashbacks").map {
-                Card.CashbackBenefit.newBuilder()
-                    .setRate(it.get("rate")?.asDouble() ?: 0.0)
-                    .setAmount(it.get("amount")?.asInt() ?: 0)
-                    .setMinimumAmount(it.get("minimum_amount")?.asInt() ?: 0)
-                    .setBenefitLimit(it.get("benefit_limit")?.asInt() ?: 0)
-                    .setMinimumSpending(it.get("minimum_spending")?.asInt() ?: 0)
-                    .setChannel(channelTypeFromString(it.get("channel").asText()))
-                    .build()
-            }
+            benefitsArray.mapNotNull { benefitNode ->
+                try {
+                    val discounts = benefitNode.get("discounts")?.map {
+                        Card.DiscountBenefit.newBuilder()
+                            .setRate(it.get("rate")?.asDouble() ?: 0.0)
+                            .setAmount(it.get("amount")?.asInt() ?: 0)
+                            .setMinimumAmount(it.get("minimum_amount")?.asInt() ?: 0)
+                            .setBenefitLimit(it.get("benefit_limit")?.asInt() ?: 0)
+                            .setMinimumSpending(it.get("minimum_spending")?.asInt() ?: 0)
+                            .setChannel(channelTypeFromString(it.get("channel")?.asText() ?: ""))
+                            .build()
+                    } ?: emptyList()
 
-            Card.Benefit.newBuilder()
-                .addAllDiscounts(discounts)
-                .addAllPoints(points)
-                .addAllCashbacks(cashbacks)
-                .addAllCategories(benefitNode.get("categories").map { it.asText() })
-                .addAllTargets(benefitNode.get("targets").map { it.asText() })
-                .setSummary(benefitNode.get("summary")?.asText() ?: "")
-                .build()
+                    val points = benefitNode.get("points")?.map {
+                        Card.PointBenefit.newBuilder()
+                            .setName(it.get("name")?.asText() ?: "")
+                            .setAmount(it.get("amount")?.asInt() ?: 0)
+                            .setRate(it.get("rate")?.asDouble() ?: 0.0)
+                            .setMinimumAmount(it.get("minimum_amount")?.asInt() ?: 0)
+                            .setBenefitLimit(it.get("benefit_limit")?.asInt() ?: 0)
+                            .setMinimumSpending(it.get("minimum_spending")?.asInt() ?: 0)
+                            .setChannel(channelTypeFromString(it.get("channel")?.asText() ?: ""))
+                            .build()
+                    } ?: emptyList()
+
+                    val cashbacks = benefitNode.get("cashbacks")?.map {
+                        Card.CashbackBenefit.newBuilder()
+                            .setRate(it.get("rate")?.asDouble() ?: 0.0)
+                            .setAmount(it.get("amount")?.asInt() ?: 0)
+                            .setMinimumAmount(it.get("minimum_amount")?.asInt() ?: 0)
+                            .setBenefitLimit(it.get("benefit_limit")?.asInt() ?: 0)
+                            .setMinimumSpending(it.get("minimum_spending")?.asInt() ?: 0)
+                            .setChannel(channelTypeFromString(it.get("channel")?.asText() ?: ""))
+                            .build()
+                    } ?: emptyList()
+
+                    Card.Benefit.newBuilder()
+                        .addAllDiscounts(discounts)
+                        .addAllPoints(points)
+                        .addAllCashbacks(cashbacks)
+                        .addAllCategories(benefitNode.get("categories")?.map { it.asText() } ?: emptyList())
+                        .addAllTargets(benefitNode.get("targets")?.map { it.asText() } ?: emptyList())
+                        .setSummary(benefitNode.get("summary")?.asText() ?: "")
+                        .build()
+                } catch (e: Exception) {
+                    println("Benefit 변환 중 오류 발생: ${e.message}")
+                    null
+                }
+            }
+        } catch (e: Exception) {
+            println("전체 JSON 파싱 실패: ${e.message}")
+            emptyList()
         }
-
-        return cardBenefitList
     }
 
     private fun channelTypeFromString(channel: String) = when (channel.uppercase()) {

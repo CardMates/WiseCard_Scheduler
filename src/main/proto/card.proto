@@ -52,7 +52,7 @@ message Benefit {
 
 message CardBenefit {
   int32 card_id = 1; // 카드 id
-  CardCompany card_bank = 2; // 카드사
+  CardCompany card_company = 2; // 카드사
   string card_name = 3; //카드명
   string img_url = 4; //카드 이미지
   CardType card_type = 5; //CREDIT|DEBIT
