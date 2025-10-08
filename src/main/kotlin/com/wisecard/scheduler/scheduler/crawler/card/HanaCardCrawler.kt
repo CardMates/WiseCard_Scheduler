@@ -3,6 +3,7 @@ package com.wisecard.scheduler.scheduler.crawler.card
 import com.wisecard.scheduler.scheduler.dto.CardCompany
 import com.wisecard.scheduler.scheduler.dto.CardInfo
 import com.wisecard.scheduler.scheduler.dto.CardType
+import com.wisecard.scheduler.scheduler.util.LoggerUtils.logCrawlingStart
 import io.github.bonigarcia.wdm.WebDriverManager
 import org.jsoup.Jsoup
 import org.openqa.selenium.By
@@ -32,20 +33,19 @@ class HanaCardCrawler : CardCrawler {
     }
 
     override fun crawlCreditCardBasicInfos(): List<CardInfo> {
-        println("======= [하나] 신용 카드 기본 정보 크롤링 =======")
+        logCrawlingStart(cardCompany, "신용 카드 기본 정보")
         return crawlCardBasics(CardType.CREDIT)
     }
 
     override fun crawlCheckCardBasicInfos(): List<CardInfo> {
-        println("======= [하나] 체크 카드 기본 정보 크롤링 =======")
+        logCrawlingStart(cardCompany, "체크 카드 기본 정보")
         return crawlCardBasics(CardType.CHECK)
     }
 
     override fun crawlCreditCardBenefits(cards: List<CardInfo>): List<CardInfo> {
-        println("======= [하나] 신용 카드 혜택 정보 크롤링 =======")
+        logCrawlingStart(cardCompany, "신용 카드 혜택 정보")
         return cards.map { card ->
             val benefits = crawlCardBenefitsFromUrl(card.cardUrl)
-            println(card.cardName + benefits)
             card.copy(
                 benefits = benefits
             )
@@ -53,10 +53,9 @@ class HanaCardCrawler : CardCrawler {
     }
 
     override fun crawlCheckCardBenefits(cards: List<CardInfo>): List<CardInfo> {
-        println("======= [하나] 체크 카드 혜택 정보 크롤링 =======")
+        logCrawlingStart(cardCompany, "체크 카드 정보 정보")
         return cards.map { card ->
             val benefits = crawlCardBenefitsFromUrl(card.cardUrl)
-            println(card.cardName + benefits)
             card.copy(
                 benefits = benefits
             )

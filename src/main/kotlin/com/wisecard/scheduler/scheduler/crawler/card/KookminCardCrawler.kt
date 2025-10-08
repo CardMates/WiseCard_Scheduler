@@ -3,6 +3,8 @@ package com.wisecard.scheduler.scheduler.crawler.card
 import com.wisecard.scheduler.scheduler.dto.CardCompany
 import com.wisecard.scheduler.scheduler.dto.CardInfo
 import com.wisecard.scheduler.scheduler.dto.CardType
+import com.wisecard.scheduler.scheduler.util.LoggerUtils.logCrawlingError
+import com.wisecard.scheduler.scheduler.util.LoggerUtils.logCrawlingStart
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Element
 import org.springframework.stereotype.Component
@@ -18,7 +20,7 @@ class KookminCardCrawler : CardCrawler {
     private val nameList = mutableSetOf<String>()
 
     override fun crawlCreditCardBasicInfos(): List<CardInfo> {
-        println("======= [국민] 신용 카드 기본 정보 크롤링 =======")
+        logCrawlingStart(cardCompany, "신용 카드 기본 정보")
         val cards = mutableListOf<CardInfo>()
         for (i in 1..11) {
             val url = "$creditCardUrl$i"
@@ -28,13 +30,29 @@ class KookminCardCrawler : CardCrawler {
     }
 
     override fun crawlCheckCardBasicInfos(): List<CardInfo> {
-        println("======= [국민] 체크 카드 기본 정보 크롤링 =======")
+        logCrawlingStart(cardCompany, "체크 카드 기본 정보")
         val cards = mutableListOf<CardInfo>()
         for (i in 1..11) {
             val url = "$checkCardUrl$i"
             cards += crawlCategoryPageBasic(url, CardType.CHECK)
         }
         return cards
+    }
+
+    override fun crawlCreditCardBenefits(cards: List<CardInfo>): List<CardInfo> {
+        logCrawlingStart(cardCompany, "신용 카드 혜택 정보")
+        return cards.map { card ->
+            val benefits = parseCardBenefitsFromUrl(card.cardUrl)
+            card.copy(benefits = benefits)
+        }
+    }
+
+    override fun crawlCheckCardBenefits(cards: List<CardInfo>): List<CardInfo> {
+        logCrawlingStart(cardCompany, "체크 카드 혜택 정보")
+        return cards.map { card ->
+            val benefits = parseCardBenefitsFromUrl(card.cardUrl)
+            card.copy(benefits = benefits)
+        }
     }
 
     private fun crawlCategoryPageBasic(url: String, cardType: CardType): List<CardInfo> {
@@ -47,7 +65,8 @@ class KookminCardCrawler : CardCrawler {
                 try {
                     val onclick = link.attr("onclick")
                     val numbers = onclick.substring(21, 26)
-                    val cardDetailUrl = "https://card.kbcard.com/CRD/DVIEW/HCAMCXPRICAC0076?mainCC=a&cooperationcode=$numbers"
+                    val cardDetailUrl =
+                        "https://card.kbcard.com/CRD/DVIEW/HCAMCXPRICAC0076?mainCC=a&cooperationcode=$numbers"
 
                     val detailDoc = Jsoup.parse(URL(cardDetailUrl).readText())
                     val cardName = detailDoc.selectFirst("h1.tit")?.text()?.trim() ?: continue
@@ -69,30 +88,13 @@ class KookminCardCrawler : CardCrawler {
                         )
                     )
                 } catch (e: Exception) {
-                    println("카드 상세 크롤링 오류: ${e.message}")
+                    logCrawlingError(cardCompany, "카드 혜택", e)
                 }
             }
-
         } catch (e: Exception) {
-            println("카테고리 페이지 접속 오류: ${e.message}")
+            logCrawlingError(cardCompany, "카드 혜택", e)
         }
         return cards
-    }
-
-    override fun crawlCreditCardBenefits(cards: List<CardInfo>): List<CardInfo> {
-        return cards.map { card ->
-            val benefit = parseCardBenefitsFromUrl(card.cardUrl)
-            println(card.cardName+benefit)
-            card.copy(benefits = benefit)
-        }
-    }
-
-    override fun crawlCheckCardBenefits(cards: List<CardInfo>): List<CardInfo> {
-        return cards.map { card ->
-            val benefit = parseCardBenefitsFromUrl(card.cardUrl)
-            println(card.cardName+benefit)
-            card.copy(benefits = benefit)
-        }
     }
 
     private fun parseCardBenefitsFromUrl(cardUrl: String): String {
@@ -101,7 +103,7 @@ class KookminCardCrawler : CardCrawler {
             val doc = Jsoup.parse(URL(fullUrl).readText())
             parseCardBenefits(doc)
         } catch (e: Exception) {
-            println("카드 혜택 크롤링 중 오류: ${e.message}")
+            logCrawlingError(cardCompany, "카드 혜택", e)
             ""
         }
     }
@@ -109,7 +111,6 @@ class KookminCardCrawler : CardCrawler {
     private fun parseCardBenefits(doc: org.jsoup.nodes.Document): String {
         val sb = StringBuilder()
 
-        // 상세혜택 id 결정
         val topTab = doc.selectFirst("li#topTab1")?.text()?.replace("\n", "")?.replace(" ", "")?.replace("\t", "")
         val tabId = if (topTab == "상세혜택") "tabCon01" else "tabCon02"
 

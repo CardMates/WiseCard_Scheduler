@@ -3,6 +3,8 @@ package com.wisecard.scheduler.scheduler.crawler.card
 import com.wisecard.scheduler.scheduler.dto.CardCompany
 import com.wisecard.scheduler.scheduler.dto.CardInfo
 import com.wisecard.scheduler.scheduler.dto.CardType
+import com.wisecard.scheduler.scheduler.util.LoggerUtils.logCrawlingError
+import com.wisecard.scheduler.scheduler.util.LoggerUtils.logCrawlingStart
 import io.github.bonigarcia.wdm.WebDriverManager
 import org.jsoup.Jsoup
 import org.openqa.selenium.By
@@ -80,17 +82,6 @@ class HyundaiCardCrawler : CardCrawler {
     )
 
     private val skipCardNames = setOf("체크카드", "Gift카드", "후불하이패스카드")
-    private val specialCardNames = setOf(
-        "쏘카", "제네시스", "야놀자ㆍ인터파크(NOL 카드)", "무신사", "SSG.COM", "네이버", "배달의민족",
-        "스타벅스", "GS칼텍스", "LG U+", "기타", "현대홈쇼핑", "예스24", "하이마트", "The CJ",
-        "coway-현대카드M Edition3", "LG전자-현대카드M Edition3", "햇살론", "인플카 현대카드"
-    )
-
-    private val myBusinessCards = setOf(
-        "MY BUSINESS M Food&Drink", "MY BUSINESS M Retail&Service", "MY BUSINESS M Online Seller",
-        "MY BUSINESS X Food&Drink", "MY BUSINESS X Retail&Service", "MY BUSINESS X Online Seller",
-        "MY BUSINESS ZERO Food&Drink", "MY BUSINESS ZERO Retail&Service", "MY BUSINESS ZERO Online Seller"
-    )
 
     private fun setupChromeDriver(): ChromeDriver {
         val options = ChromeOptions()
@@ -111,22 +102,22 @@ class HyundaiCardCrawler : CardCrawler {
     }
 
     override fun crawlCreditCardBasicInfos(): List<CardInfo> {
-        println("======= [현대] 신용 카드 기본 정보 크롤링 =======")
+        logCrawlingStart(cardCompany, "신용 카드 기본 정보")
         return crawlCardBasics(CardType.CREDIT)
     }
 
     override fun crawlCheckCardBasicInfos(): List<CardInfo> {
-        println("======= [현대] 체크 카드 기본 정보 크롤링 =======")
+        logCrawlingStart(cardCompany, "체크 카드 기본 정보")
         return crawlCardBasics(CardType.CHECK)
     }
 
     override fun crawlCreditCardBenefits(cards: List<CardInfo>): List<CardInfo> {
-        println("======= [현대] 신용 카드 혜택 정보 크롤링 =======")
+        logCrawlingStart(cardCompany, "신용 카드 혜택 정보")
         return crawlCardBenefits(cards)
     }
 
     override fun crawlCheckCardBenefits(cards: List<CardInfo>): List<CardInfo> {
-        println("======= [현대] 체크 카드 혜택 정보 크롤링 =======")
+        logCrawlingStart(cardCompany, "체크 카드 혜택 정보")
         return crawlCardBenefits(cards)
     }
 
@@ -182,7 +173,7 @@ class HyundaiCardCrawler : CardCrawler {
                 }
             }
         } catch (e: Exception) {
-            println("크롤링 실패 ${e.message}")
+            logCrawlingError(cardCompany, "카드 혜택", e)
         } finally {
             driver.quit()
         }
@@ -227,9 +218,8 @@ class HyundaiCardCrawler : CardCrawler {
                 }
             }
         } catch (e: Exception) {
-            println("크롤링 실패 : ${e.message}")
+            logCrawlingError(cardCompany, "카드 혜택", e)
         }
-
         return cardInfos
     }
 
@@ -242,7 +232,7 @@ class HyundaiCardCrawler : CardCrawler {
         )
 
         try {
-            cards.forEachIndexed { index, cardInfo ->
+            cards.forEachIndexed { _, cardInfo ->
                 try {
                     driver.get(cardInfo.cardUrl)
                     WebDriverWait(driver, Duration.ofSeconds(30)).until(
@@ -274,9 +264,8 @@ class HyundaiCardCrawler : CardCrawler {
                             benefits = removeBlank(texts.joinToString(" | "))
                         )
                     )
-                    println(cardInfo.cardName + texts)
                 } catch (e: Exception) {
-                    println("크롤링 실패 ${cardInfo.cardName}: ${e.message}")
+                    logCrawlingError(cardCompany, "카드 혜택", e)
                     result.add(cardInfo.copy(benefits = ""))
                 }
             }
