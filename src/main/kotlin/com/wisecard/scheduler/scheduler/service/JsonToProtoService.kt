@@ -3,6 +3,7 @@ package com.wisecard.scheduler.scheduler.service
 import Card
 import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.wisecard.scheduler.scheduler.util.logger
 import org.springframework.stereotype.Component
 
 
@@ -11,9 +12,14 @@ class JsonToProtoService(private val objectMapper: ObjectMapper) {
 
     fun parseJsonToProto(json: String): List<Card.Benefit> {
         return try {
-            objectMapper.configure(JsonParser.Feature.ALLOW_COMMENTS, true) //json 내에 주석 허용
+            objectMapper.configure(JsonParser.Feature.ALLOW_COMMENTS, true)
+            val root = try {
+                objectMapper.readTree(json)
+            } catch (e: Exception) {
+                logger.error("JSON 파싱 실패: ${e.message}")
+                return emptyList()
+            }
 
-            val root = objectMapper.readTree(json)
             val benefitsArray = root.get("benefits") ?: return emptyList()
 
             benefitsArray.mapNotNull { benefitNode ->
@@ -61,12 +67,12 @@ class JsonToProtoService(private val objectMapper: ObjectMapper) {
                         .setSummary(benefitNode.get("summary")?.asText() ?: "")
                         .build()
                 } catch (e: Exception) {
-                    println("Benefit 변환 중 오류 발생: ${e.message}")
+                    logger.error("proto message 변환 중 오류 발생: ${e.message}")
                     null
                 }
             }
         } catch (e: Exception) {
-            println("전체 JSON 파싱 실패: ${e.message}")
+            logger.error("전체 JSON 파싱 실패: ${e.message}")
             emptyList()
         }
     }
