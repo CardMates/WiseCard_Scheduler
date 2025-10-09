@@ -17,5 +17,5 @@ message CardPromotionList {
 }
 
 service PromotionService {
-  rpc getPromotions(google.protobuf.Empty) returns (CardPromotionList);
+  rpc receivePromotions(CardPromotionList) returns (google.protobuf.Empty);
 }
