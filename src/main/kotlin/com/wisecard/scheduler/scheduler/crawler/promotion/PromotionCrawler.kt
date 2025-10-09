@@ -1,7 +1,10 @@
 package com.wisecard.scheduler.scheduler.crawler.promotion
 
-import com.wisecard.scheduler.scheduler.dto.Promotion
+import com.wisecard.scheduler.scheduler.dto.CardCompany
+import com.wisecard.scheduler.scheduler.dto.PromotionInfo
 
-interface  PromotionCrawler {
-    fun crawlPromotions() : List<Promotion>
+interface PromotionCrawler {
+    val cardCompany: CardCompany
+
+    fun crawlPromotions(): List<PromotionInfo>
 }
