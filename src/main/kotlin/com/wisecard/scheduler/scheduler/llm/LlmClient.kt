@@ -1,15 +1,19 @@
 package com.wisecard.scheduler.scheduler.llm
 
 import com.google.genai.Client
+import com.wisecard.scheduler.scheduler.util.logger
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 
 @Component
-class LlmClient {
+class LlmClient(
+    @Value("\${llm.api-key}") private val apiKey: String
+) {
     fun refine(benefitText: String): String {
-        val apiKey = ""
-        val model = "gemini-2.5-flash"
+        try {
+            val model = "gemini-2.5-flash"
 
-        val prompt = """
+            val prompt = """
                 $benefitText
 다음 텍스트를 분석하여 카드 혜택 정보를 CrawledBenefit proto 메시지(JSON 표현)으로만 출력하라. 
 다른 설명, 주석, 불필요한 텍스트는 출력하지 않는다. 
@@ -51,7 +55,7 @@ class LlmClient {
         },
         ...
       ],
-      "categories": ["MT1", ...],   // 카카오맵 업종 코드 필수, 알맞은 코드가 없으면 빈 배열
+      "categories": ["MT1", ...],   // 카카오맵 업종 코드 필수, string으로 큰따옴표("MT1") 필수, 알맞은 코드가 없으면 빈 배열
       "targets": ["스타벅스", "투썸플레이스", "음식점", ...] // 브랜드명 또는 한글 설명
       "summary": string // 혜택 정보 한 줄 요약 정리
     ]
@@ -76,10 +80,13 @@ class LlmClient {
 - "benefits", "discounts", "points", "cashbacks", "categories", "targets", "summary"는 필수로 출력하고 관련 내용이 없으면 빈 배열을 출력한다.
             """.trimIndent()
 
-        val client = Client.builder().apiKey(apiKey).build()
-        val response = client.models.generateContent(model, prompt, null)
-        val text = response.text()!!.replace("```json", "").replace("```", "")
-        println(text)
-        return text
+            val client = Client.builder().apiKey(apiKey).build()
+            val response = client.models.generateContent(model, prompt, null)
+            val text = response.text()!!.replace("```json", "").replace("```", "")
+            return text
+        } catch (e: Exception) {
+            logger.error("LLM 변환 에러: "+e.message)
+        }
+        return ""
     }
 }
