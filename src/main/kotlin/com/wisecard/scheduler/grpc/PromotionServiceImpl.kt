@@ -5,12 +5,12 @@ import PromotionServiceGrpc
 import com.wisecard.scheduler.scheduler.util.logger
 import io.grpc.ManagedChannelBuilder
 import net.devh.boot.grpc.server.service.GrpcService
+import org.springframework.stereotype.Service
 
-@GrpcService
+@Service
 class PromotionServiceImpl(
     private val grpcProperties: GrpcProperties
-) : PromotionServiceGrpc.PromotionServiceImplBase() {
-
+) {
     fun sendPromotions(promotionList: Promotion.CardPromotionList) {
         val channel = ManagedChannelBuilder
             .forAddress(grpcProperties.host, grpcProperties.port)
