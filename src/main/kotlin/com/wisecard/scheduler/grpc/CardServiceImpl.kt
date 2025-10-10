@@ -4,7 +4,6 @@ import Card
 import CardServiceGrpc
 import com.wisecard.scheduler.scheduler.util.logger
 import io.grpc.ManagedChannelBuilder
-import net.devh.boot.grpc.server.service.GrpcService
 import org.springframework.stereotype.Service
 
 @Service
