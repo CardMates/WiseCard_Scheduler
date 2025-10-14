@@ -16,8 +16,7 @@ import com.wisecard.scheduler.scheduler.service.CardDataStorageService
 import com.wisecard.scheduler.scheduler.service.JsonToProtoService
 import com.wisecard.scheduler.scheduler.util.DateUtils.toProtoTimestamp
 import com.wisecard.scheduler.scheduler.util.logger
-import org.springframework.boot.ApplicationArguments
-import org.springframework.boot.ApplicationRunner
+import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 
 @Component
@@ -29,12 +28,10 @@ class CrawlingAndRefiningScheduler(
     private val cardService: CardServiceImpl,
     private val promotionService: PromotionServiceImpl,
     private val cardDataStorageService: CardDataStorageService
-) : ApplicationRunner {
-//) {
+) {
 
-    override fun run(args: ApplicationArguments?) {
-//    @Scheduled(cron = "0 0 0 * * *", zone = "Asia/Seoul")
-//    fun scheduler() {
+    @Scheduled(cron = "0 0 0 * * *", zone = "Asia/Seoul")
+    fun scheduler() {
         // 프로모션
         val promotions = promotionCrawlers.flatMap { it.crawlPromotions() }
         sendAllPromotions(promotions)
