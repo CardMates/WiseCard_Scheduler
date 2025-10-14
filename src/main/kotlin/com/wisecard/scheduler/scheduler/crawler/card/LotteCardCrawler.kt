@@ -51,7 +51,12 @@ class LotteCardCrawler : CardCrawler {
     private fun crawlBasicInfos(listUrl: String, cardType: CardType): List<CardInfo> {
         val cards = mutableListOf<CardInfo>()
         val options = ChromeOptions()
-        options.addArguments("--headless")
+        options.addArguments("--headless=new")
+        options.addArguments("--no-sandbox")
+        options.addArguments("--disable-dev-shm-usage")
+        options.addArguments("--disable-gpu")
+        options.addArguments("--remote-allow-origins=*")
+        options.addArguments("--user-data-dir=/tmp/chrome-user-data-${System.currentTimeMillis()}")
         val driver: WebDriver = ChromeDriver(options)
         driver.get(listUrl)
 
@@ -118,7 +123,14 @@ class LotteCardCrawler : CardCrawler {
 
     private fun crawlCardBenefits(cardUrl: String): String {
         return try {
-            val driver: WebDriver = ChromeDriver(ChromeOptions().addArguments("--headless"))
+            val options = ChromeOptions()
+            options.addArguments("--headless=new")
+            options.addArguments("--no-sandbox")
+            options.addArguments("--disable-dev-shm-usage")
+            options.addArguments("--disable-gpu")
+            options.addArguments("--remote-allow-origins=*")
+            options.addArguments("--user-data-dir=/tmp/chrome-user-data-${System.currentTimeMillis()}")
+            val driver: WebDriver = ChromeDriver(options)
             driver.get(cardUrl)
             Thread.sleep(3000)
 
