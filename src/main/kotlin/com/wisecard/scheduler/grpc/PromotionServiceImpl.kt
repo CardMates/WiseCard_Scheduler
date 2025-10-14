@@ -1,6 +1,7 @@
 package com.wisecard.scheduler.grpc
 
-import Promotion
+import com.sub.grpc.CardPromotionServiceGrpc
+import com.sub.grpc.Promotion
 import com.wisecard.scheduler.scheduler.util.logger
 import io.grpc.ManagedChannelBuilder
 import org.springframework.stereotype.Service

@@ -1,8 +1,8 @@
 package com.wisecard.scheduler.scheduler.service
 
-import Card
 import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.sub.grpc.CardData
 import com.wisecard.scheduler.scheduler.util.logger
 import org.springframework.stereotype.Component
 
@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component
 @Component
 class JsonToProtoService(private val objectMapper: ObjectMapper) {
 
-    fun parseJsonToProto(json: String): List<Card.Benefit> {
+    fun parseJsonToProto(json: String): List<CardData.Benefit> {
         return try {
             objectMapper.configure(JsonParser.Feature.ALLOW_COMMENTS, true)
             val root = try {
@@ -25,7 +25,7 @@ class JsonToProtoService(private val objectMapper: ObjectMapper) {
             benefitsArray.mapNotNull { benefitNode ->
                 try {
                     val discounts = benefitNode.get("discounts")?.map {
-                        Card.DiscountBenefit.newBuilder()
+                        CardData.DiscountBenefit.newBuilder()
                             .setRate(it.get("rate")?.asDouble() ?: 0.0)
                             .setAmount(it.get("amount")?.asInt() ?: 0)
                             .setMinimumAmount(it.get("minimum_amount")?.asInt() ?: 0)
@@ -36,7 +36,7 @@ class JsonToProtoService(private val objectMapper: ObjectMapper) {
                     } ?: emptyList()
 
                     val points = benefitNode.get("points")?.map {
-                        Card.PointBenefit.newBuilder()
+                        CardData.PointBenefit.newBuilder()
                             .setName(it.get("name")?.asText() ?: "")
                             .setAmount(it.get("amount")?.asInt() ?: 0)
                             .setRate(it.get("rate")?.asDouble() ?: 0.0)
@@ -48,7 +48,7 @@ class JsonToProtoService(private val objectMapper: ObjectMapper) {
                     } ?: emptyList()
 
                     val cashbacks = benefitNode.get("cashbacks")?.map {
-                        Card.CashbackBenefit.newBuilder()
+                        CardData.CashbackBenefit.newBuilder()
                             .setRate(it.get("rate")?.asDouble() ?: 0.0)
                             .setAmount(it.get("amount")?.asInt() ?: 0)
                             .setMinimumAmount(it.get("minimum_amount")?.asInt() ?: 0)
@@ -58,7 +58,7 @@ class JsonToProtoService(private val objectMapper: ObjectMapper) {
                             .build()
                     } ?: emptyList()
 
-                    Card.Benefit.newBuilder()
+                    CardData.Benefit.newBuilder()
                         .addAllDiscounts(discounts)
                         .addAllPoints(points)
                         .addAllCashbacks(cashbacks)
@@ -78,8 +78,8 @@ class JsonToProtoService(private val objectMapper: ObjectMapper) {
     }
 
     private fun channelTypeFromString(channel: String) = when (channel.uppercase()) {
-        "ONLINE" -> Card.ChannelType.ONLINE
-        "OFFLINE" -> Card.ChannelType.OFFLINE
-        else -> Card.ChannelType.BOTH
+        "ONLINE" -> CardData.ChannelType.ONLINE
+        "OFFLINE" -> CardData.ChannelType.OFFLINE
+        else -> CardData.ChannelType.BOTH
     }
 }

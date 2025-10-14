@@ -1,8 +1,8 @@
 package com.wisecard.scheduler.scheduler
 
-import Card
-import CardCompanyOuterClass
-import Promotion
+import com.sub.grpc.CardCompanyOuterClass
+import com.sub.grpc.CardData
+import com.sub.grpc.Promotion
 import com.wisecard.scheduler.grpc.CardServiceImpl
 import com.wisecard.scheduler.grpc.PromotionServiceImpl
 import com.wisecard.scheduler.scheduler.crawler.card.CardCrawler
@@ -16,7 +16,8 @@ import com.wisecard.scheduler.scheduler.service.CardDataStorageService
 import com.wisecard.scheduler.scheduler.service.JsonToProtoService
 import com.wisecard.scheduler.scheduler.util.DateUtils.toProtoTimestamp
 import com.wisecard.scheduler.scheduler.util.logger
-import org.springframework.scheduling.annotation.Scheduled
+import org.springframework.boot.ApplicationArguments
+import org.springframework.boot.ApplicationRunner
 import org.springframework.stereotype.Component
 
 @Component
@@ -28,10 +29,12 @@ class CrawlingAndRefiningScheduler(
     private val cardService: CardServiceImpl,
     private val promotionService: PromotionServiceImpl,
     private val cardDataStorageService: CardDataStorageService
-) {
+) : ApplicationRunner {
+//) {
 
-    @Scheduled(cron = "0 0 0 * * *", zone = "Asia/Seoul")
-    fun scheduler() {
+    override fun run(args: ApplicationArguments?) {
+//    @Scheduled(cron = "0 0 0 * * *", zone = "Asia/Seoul")
+//    fun scheduler() {
         // 프로모션
         val promotions = promotionCrawlers.flatMap { it.crawlPromotions() }
         sendAllPromotions(promotions)
@@ -90,17 +93,17 @@ class CrawlingAndRefiningScheduler(
     }
 
     private fun sendAllCards(cards: List<CardInfo>) {
-        val listBuilder = Card.CardBenefitList.newBuilder()
+        val listBuilder = CardData.CardBenefitList.newBuilder()
 
         cards.forEach { card ->
             val message = jsonToProtoService.parseJsonToProto(card.benefits ?: "")
 
-            val crawledBenefit = Card.CardBenefit.newBuilder()
+            val crawledBenefit = CardData.CardBenefit.newBuilder()
                 .setCardId(card.cardId ?: 0)
                 .setCardCompany(mapToProtoCompany(card.cardCompany))
                 .setCardName(card.cardName)
                 .setImgUrl(card.imgUrl ?: "")
-                .setCardType(if (card.cardType.name == "CREDIT") Card.CardType.CREDIT else Card.CardType.DEBIT)
+                .setCardType(if (card.cardType.name == "CREDIT") CardData.CardType.CREDIT else CardData.CardType.DEBIT)
                 .addAllBenefits(message)
                 .build()
 

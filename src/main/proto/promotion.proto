@@ -1,7 +1,11 @@
 syntax = "proto3";
+
+package com.sub.grpc;
+
+
 import "google/protobuf/empty.proto";
 import "google/protobuf/timestamp.proto";
-import "card_company.proto";
+import "cardCompany.proto";
 
 message CardPromotion {
   CardCompany card_company = 1; // 카드사

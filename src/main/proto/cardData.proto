@@ -1,6 +1,9 @@
 syntax = "proto3";
+
+package com.sub.grpc;
+
 import "google/protobuf/empty.proto";
-import "card_company.proto";
+import "cardCompany.proto";
 
 enum ChannelType {
   ONLINE = 0;
