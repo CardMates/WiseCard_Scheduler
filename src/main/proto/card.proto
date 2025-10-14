@@ -66,3 +66,15 @@ message CardBenefitList {
 service CardService {
   rpc receiveCardBenefits(CardBenefitList) returns (google.protobuf.Empty);
 }
+
+// 응답 메시지
+message CardSaveResponse {
+  bool success = 1;
+  string message = 2;
+  int32 saved_count = 3;
+}
+
+// API 서버 저장 서비스
+service CardDataService {
+  rpc SaveCardData(CardBenefitList) returns (CardSaveResponse);
+}
