@@ -1,14 +1,13 @@
-package com.wisecard.scheduler.application.parse
+package com.wisecard.scheduler.application.mapper
 
 import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.sub.grpc.CardData
 import com.wisecard.scheduler.util.logger
-import org.springframework.stereotype.Component
 
+object CardBenefitMapper {
 
-@Component
-class JsonToProtoService(private val objectMapper: ObjectMapper) {
+    private val objectMapper = ObjectMapper()
 
     fun parseJsonToProto(json: String): List<CardData.Benefit> {
         return try {

@@ -2,7 +2,6 @@ package com.wisecard.scheduler.infrastructure.llm
 
 import com.google.genai.Client
 import com.wisecard.scheduler.util.logger
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 
 @Component
@@ -85,7 +84,7 @@ class LlmClient(
             val text = response.text()!!.replace("```json", "").replace("```", "")
             return text
         } catch (e: Exception) {
-            logger.error("LLM 변환 에러: "+e.message)
+            logger.error("LLM 변환 에러: " + e.message)
         }
         return ""
     }
