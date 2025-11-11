@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component
 
 @Component
 class LlmClient(
-    @Value("\${llm.api-key}") private val apiKey: String
+    private val llmProperties: LlmProperties
 ) {
     fun refine(benefitText: String): String {
         try {
@@ -80,7 +80,7 @@ class LlmClient(
 - "benefits", "discounts", "points", "cashbacks", "categories", "targets", "summary"는 필수로 출력하고 관련 내용이 없으면 빈 배열을 출력한다.
             """.trimIndent()
 
-            val client = Client.builder().apiKey(apiKey).build()
+            val client = Client.builder().apiKey(llmProperties.apiKey).build()
             val response = client.models.generateContent(model, prompt, null)
             val text = response.text()!!.replace("```json", "").replace("```", "")
             return text
