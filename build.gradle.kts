@@ -1,4 +1,4 @@
-import com.google.protobuf.gradle.*
+import com.google.protobuf.gradle.id
 
 plugins {
     kotlin("jvm") version "1.9.25"
@@ -35,6 +35,10 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    testImplementation("io.mockk:mockk:1.13.13")
+    testImplementation("com.ninja-squad:springmockk:4.0.2")
+    testImplementation("org.assertj:assertj-core:3.26.3")
+    testImplementation("com.willowtreeapps.assertk:assertk-jvm:0.28.1")
 
     // csv
     implementation("com.opencsv:opencsv:5.12.0")

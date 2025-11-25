@@ -7,12 +7,16 @@ import org.springframework.stereotype.Component
 
 @Component
 class CardStorageAdapter(
-    private val delegate: CardDataStorageService
+    private val cardDataStorageService: CardDataStorageService
 ) : CardStoragePort {
-    override fun loadStoredCards(): List<CardInfo> = delegate.loadStoredCards()
-    override fun saveCards(cards: List<CardInfo>) = delegate.saveCards(cards)
-    override fun filterNewCards(crawledCards: List<CardInfo>): List<CardInfo> = delegate.filterNewCards(crawledCards)
-    override fun assignIdsToNewCards(newCards: List<CardInfo>): List<CardInfo> = delegate.assignIdsToNewCards(newCards)
+    override fun loadStoredCards(): List<CardInfo> = cardDataStorageService.loadStoredCards()
+    override fun saveCards(cards: List<CardInfo>) = cardDataStorageService.saveCards(cards)
+    override fun filterNewCards(crawledCards: List<CardInfo>): List<CardInfo> =
+        cardDataStorageService.filterNewCards(crawledCards)
+
+    override fun assignIdsToNewCards(newCards: List<CardInfo>): List<CardInfo> =
+        cardDataStorageService.assignIdsToNewCards(newCards)
+
     override fun mergeCards(existingCards: List<CardInfo>, newCards: List<CardInfo>): List<CardInfo> =
-        delegate.mergeCards(existingCards, newCards)
+        cardDataStorageService.mergeCards(existingCards, newCards)
 }
