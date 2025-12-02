@@ -66,10 +66,6 @@ message CardBenefitList {
   repeated CardBenefit cardBenefits = 1;
 }
 
-service CardService {
-  rpc receiveCardBenefits(CardBenefitList) returns (google.protobuf.Empty);
-}
-
 // 응답 메시지
 message CardSaveResponse {
   bool success = 1;

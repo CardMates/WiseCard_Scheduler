@@ -8,10 +8,12 @@ import org.springframework.stereotype.Service
 import java.io.File
 
 @Service
-class CardDataStorageService {
+class CardDataStorageService(
+    filePath: String = "data/crawled_cards.json"
+) {
 
     private val objectMapper = ObjectMapper().registerModule(KotlinModule.Builder().build())
-    private val dataFile = File("data/crawled_cards.json")
+    private val dataFile = File(filePath)
 
     fun loadStoredCards(): List<CardInfo> {
         return if (dataFile.exists()) {
